@@ -1,0 +1,19 @@
+{
+  "name": "js-ps",
+  "version": "2.0.0",
+  "description": "获取process的使用信息：'user','pid','cpu','mem','vsz','rss','tt','stat','started', 'time','command'",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "process",
+    "cpu",
+    "rss",
+    "stat",
+    "started"
+  ],
+  "dependencies":{"debug":"*"},
+  "author": "ming",
+  "license": "ISC"
+}
