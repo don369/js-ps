@@ -5,45 +5,44 @@ const debug = require('debug')('js-ps');
  */
 const _info_title = ['user','pid','cpu','mem','vsz','rss','tt','stat','started', 'time'];
 
-ps = module.exports = {
-    get(...agrs){
-        let method;
-        const [_, callback] = handleAgrs(agrs);
-        method = (typeof agrs[0] === 'number') ? 'getOne' : 'getMany';
+const ps = module.exports = function(...agrs){
+    return ps.get(...agrs);
+}
+ps.get = (...agrs)=>{
+    let method;
+    const [_, callback] = handleAgrs(agrs);
+    method = (typeof agrs[0] === 'number') ? 'getOne' : 'getMany';
+    return callback ? ps[method](...agrs) : ps[`${method}Sync`](...agrs);
+}
+ps.getOne = (...pid/*, callback*/)=>{
+    const [_pid, callback] = handleAgrs(pid);
+    const command = formatCommand(_pid || process.pid);
+    if(!callback) return psFormat(psExecSync(command)[0]);;
 
-        return callback ? ps[method](...agrs) : ps[`${method}Sync`](...agrs);
-    },
-    getOne(...pid/*, callback*/){
-        const [_pid, callback] = handleAgrs(pid);
-        const command = formatCommand(_pid || process.pid);
-        if(!callback) return psFormat(psExecSync(command)[0]);;
+    psExec(command,(err, data)=>{
+        if(err) return callback(err);
+        callback(null, psFormat(data[0]));
+    });
+},
 
-        psExec(command,(err, data)=>{
-            if(err) return callback(err);
-            callback(null, psFormat(data[0]));
-        });
-    },
+ps.getMany = (...pid/*, callback*/)=>{
+    let _ps = {};
+    const [_pid, callback] = handleAgrs(pid);
+    const command = (_pid instanceof Array) ? formatCommand(_pid) : '';
+    if(!callback) return forData(psExecSync(command));
+    psExec(command,(err, data)=>{
+        if(err) return callback(err);
+        callback(null,forData(data));
+    });
+}
 
-    getMany(...pid/*, callback*/){
-        let _ps = {};
-        const [_pid, callback] = handleAgrs(pid);
-        const command = (_pid instanceof Array) ? formatCommand(_pid) : '';
-        if(!callback) return forData(psExecSync(command));
+ps.getOneSync = (pid = process.pid)=>{
+    return psFormat(psExecSync(formatCommand(pid))[0]);
+}
 
-        psExec(command,(err, data)=>{
-            if(err) return callback(err);
-            console.log(data);
-            callback(null,forData(data));
-        });
-    },
-    getOneSync(pid = process.pid){
-        return psFormat(psExecSync(formatCommand(pid))[0]);
-    },
-    getManySync(pid){
-        const data = psExecSync((pid instanceof Array) ? formatCommand(pid) : '');
-        return forData(data);
-    }
-
+ps.getManySync = (pid)=>{
+    const data = psExecSync((pid instanceof Array) ? formatCommand(pid) : '');
+    return forData(data);
 }
 
 function formatCommand(pid){
