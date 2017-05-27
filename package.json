@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository":{"type":"git","url":"存放点的url"},
+  "repository":{"type":"git","url":"https://github.com/don369/js-ps.git"},
   "keywords": [
     "process",
     "cpu",
